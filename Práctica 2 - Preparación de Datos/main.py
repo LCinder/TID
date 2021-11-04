@@ -12,7 +12,7 @@ def loadDataset():
 if __name__=="__main__":
     data = loadDataset()
 
-    #Elimina columnas, 1 porque es una columna
+    #Elimina columnas
     data = data.drop("normalized-losses", axis="columns")
 
     #Elimina columnas con un 10% de valores perdidos
