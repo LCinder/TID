@@ -38,7 +38,7 @@ if __name__ == "__main__":
     "SPDLIM_H", "LGTCON_I", "WEATHR_I", "ALCHL_I"]
 
     for element in elements:
-        discr = KBinsDiscretizer(n_bins=2, encode="ordinal", strategy="uniform")
+        discr = KBinsDiscretizer(n_bins=5, encode="ordinal", strategy="uniform")
         x_train[element] = discr.fit_transform(x_train[element].values.reshape(-1, 1))
 
     ctree.fit(x_train, y_train)
