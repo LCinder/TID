@@ -1,7 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="22d49f0c-7478-46a4-ad2b-846aa90c9c55" name="Changes" comment="" />
+    <list default="true" id="22d49f0c-7478-46a4-ad2b-846aa90c9c55" name="Changes" comment="">
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ejercicio4.png" beforeDir="false" afterPath="$PROJECT_DIR$/ejercicio4.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ejercicio6_bubble.png" beforeDir="false" afterPath="$PROJECT_DIR$/ejercicio6_bubble.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/main.py" beforeDir="false" afterPath="$PROJECT_DIR$/main.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../Práctica 2 - Preparación de Datos/ges.py" beforeDir="false" afterPath="$PROJECT_DIR$/../Práctica 2 - Preparación de Datos/ges.py" afterDir="false" />
+    </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -42,7 +48,9 @@
     <property name="RunOnceActivity.OpenProjectViewOnStart" value="true" />
     <property name="RunOnceActivity.ShowReadmeOnStart" value="true" />
     <property name="WebServerToolWindowFactoryState" value="false" />
-    <property name="last_opened_file_path" value="$PROJECT_DIR$/../../IC" />
+    <property name="last_opened_file_path" value="$PROJECT_DIR$" />
+    <property name="node.js.detected.package.eslint" value="true" />
+    <property name="node.js.selected.package.eslint" value="(autodetect)" />
     <property name="restartRequiresConfirmation" value="false" />
     <property name="settings.editor.selected.configurable" value="preferences.keymap" />
   </component>
@@ -110,6 +118,8 @@
       <workItem from="1634483839161" duration="6946000" />
       <workItem from="1634545194890" duration="3928000" />
       <workItem from="1634849744984" duration="68000" />
+      <workItem from="1636534637130" duration="6352000" />
+      <workItem from="1636901477431" duration="81000" />
     </task>
     <servers />
   </component>
@@ -135,7 +145,7 @@
     </breakpoint-manager>
   </component>
   <component name="com.intellij.coverage.CoverageDataManagerImpl">
-    <SUITE FILE_PATH="coverage/Práctica_1___Visualización$mainVisualizacion.coverage" NAME="mainVisualizacion Coverage Results" MODIFIED="1634549143200" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+    <SUITE FILE_PATH="coverage/Práctica_1___Visualización$mainVisualizacion.coverage" NAME="mainVisualizacion Coverage Results" MODIFIED="1636541679438" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
     <SUITE FILE_PATH="coverage/Práctica_1___Visualización$main.coverage" NAME="mainMNIST Coverage Results" MODIFIED="1634417328266" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/../../IC/Práctica 1 - MNIST RNN" />
     <SUITE FILE_PATH="coverage/Práctica_1___Visualización$mainMNIST.coverage" NAME="mainMNIST Coverage Results" MODIFIED="1634490756911" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/../../IC/Práctica 1 - MNIST RNN" />
   </component>

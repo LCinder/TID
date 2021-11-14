@@ -57,12 +57,10 @@ def ejercicio4():
     y_mat = [4.5, 2.8, 6.75, 1.25, 9.8, 10, 5.5, 5, 3.4, 2.1, 0, 8.7, 6.25]
     y_fis = [2, 1.2, 5, 4.5, 8, 9.9, 1.75, 4.75, 5, 1.8, 0, 9.75, 4.5]
 
-    plot.scatter(range(len(y_mat)), y_mat, color="b", label="Matemáticas")
-    plot.scatter(range(len(y_fis)), y_fis, color="r", label="Física")
-    plot.xlabel("Nº Alumno")
-    plot.ylabel("Nota obtenida")
-    plot.title("Nº Alumnos y notas obtenidas")
-    plot.legend()
+    plot.scatter(y_mat, y_fis, color="r")
+    plot.xlabel("Nota en Matemáticas")
+    plot.ylabel("Nota en Física")
+    plot.title("Notas obtenidas")
     plot.savefig("ejercicio4.png")
     plot.show()
 
@@ -91,10 +89,21 @@ def ejercicio6():
     plot.savefig("ejercicio6_hist.png")
     plot.show()
 
-    plot.scatter(range(len(familySize)), familySize, alpha=0.5, s=500)
-    plot.yticks(range(max(familySize)+1))
+    x = familySize
+    y = [np.count_nonzero(familySize == 1), np.count_nonzero(familySize == 2),
+    np.count_nonzero(familySize == 3), np.count_nonzero(familySize == 4)]
+    plot.scatter(x, y, alpha=0.5, s=500)
     plot.title("Nº Miembros Familia")
+    plot.xlabel("Nº miembros")
+    plot.ylabel("Nº Personas")
     plot.savefig("ejercicio6_bubble.png")
+    plot.show()
+
+    plot.pie([np.count_nonzero(familySize == 1), np.count_nonzero(familySize == 2),
+    np.count_nonzero(familySize == 3), np.count_nonzero(familySize == 4)],
+    labels=[(1, np.count_nonzero(familySize == 1)), (2, np.count_nonzero(familySize == 2)), (3, np.count_nonzero(familySize == 3)), (4, np.count_nonzero(familySize == 4))])
+    plot.title("Nº Miembros Familia")
+    plot.savefig("ejercicio6_!_bubble.png")
     plot.show()
 
     plot.scatter(age, experience, alpha=0.5, c="r")
@@ -116,4 +125,4 @@ def ejercicio6():
     plot.show()
 
 if __name__ == '__main__':
-    ejercicio5()
+    ejercicio6()
