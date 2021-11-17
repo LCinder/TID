@@ -1,4 +1,4 @@
-
+import numpy as np
 import pandas
 import numpy
 from chefboost import Chefboost
@@ -51,7 +51,7 @@ def discretize(x_train_arg, x_test_arg):
         discr = KBinsDiscretizer(n_bins=bin_i, encode="ordinal", strategy="uniform")
 
         for i in range(n):
-            accuracy_mean += pred(x_train_arg, y_train, x_test_arg, y_test)
+            accuracy_mean += pred(x_train, y_train, x_test, y_test)
             x_train_disc[variable] = discr.fit_transform(x_train_arg[variable].values.reshape(-1, 1))
             accuracy_mean_discr += pred(x_train_disc, y_train, x_test_arg, y_test)
 
@@ -74,7 +74,6 @@ def loss_values():
 
     x_train_not_imputed_mode = remove_columns(x_train, imputed)
     x_train_not_imputed_mean = remove_columns(x_train, imputed)
-    x_test_not_imputed = remove_columns(x_test, imputed)
     unknown = [9, 99, 9, 19, 99, 9, 9, 9, 29, 49, 99, 99, 9, 9, 9]
 
     for i in range(n):
@@ -134,37 +133,39 @@ def loss_values():
 
 
     if sort[1] == "Imputed":
-        return x_train_imputed
+        return x_train_imputed, "Imputed"
     elif sort[1] == "Not Imputed":
-        return x_train
+        return x_train, "Not Imputed"
     elif sort[1] == "Not Imputed Mean":
-        return x_train_not_imputed_mean
+        return x_train_not_imputed_mean, "Not Imputed Mean"
     elif sort[1] == "Not Imputed Mode":
-        return x_train_not_imputed_mode
+        return x_train_not_imputed_mode, "Not Imputed Mode"
     elif sort[1] == "Imputed Removed Instances":
-        return x_train_imputed_instances
+        return x_train_imputed_instances, "Imputed Removed Instances"
     elif sort[1] == "Imputed Removed Characteristics":
-        return x_train_imputed
+        return x_train_imputed, "Imputed Removed Characteristics"
 
 
 #https://www.analyticsvidhya.com/blog/2021/04/backward-feature-elimination-and-its-implementation/
-def selection(x_train_discr, x_test):
-    x_test = remove_columns(x_test, not_imputed)
-    all = pred(x_train_discr, y_train, x_test, y_test)
+def selection(x_sel, x_test_sel):
+    #x_test_sel = remove_columns(x_test_sel, not_imputed)
+    all = pred(x_sel, y_train, x_test_sel, y_test)
 
-    s = sequential_feature(GaussianNB(), k_features=3, forward=False)
-    s = s.fit(x_train_discr, y_train)
+    s = sequential_feature(GaussianNB(), k_features=5, forward=False)
+    s = s.fit(x_sel, np.ravel(y_train))
     features = list(s.k_feature_names_)
 
-    not_selected = list(set(x_train_discr.columns) - set(features))
+    not_selected = list(set(x_sel.columns) - set(features))
 
-    x_train_discr = remove_columns(x_train_discr, not_selected)
-    x_test = remove_columns(x_test, not_selected)
-    removed_features = pred(x_train_discr, y_train, x_test, y_test)
+    x_sel = remove_columns(x_sel, not_selected)
+    x_test_sel = remove_columns(x_test_sel, not_selected)
+    removed_features = pred(x_sel, y_train, x_test_sel, y_test)
 
     print("Accuracy All: " + str(all))
     print("Features: " + str(features))
     print("Accuracy Removed Features: " + str(removed_features))
+
+    return x_sel, x_test_sel
 
 
 if __name__ == "__main__":
@@ -181,9 +182,21 @@ if __name__ == "__main__":
     x_train_discr = discretize(x_train, x_test)
 
     #Ejercicio 2
-    best = loss_values()
+    best, mode  = loss_values()
+
+    print("El mejor es " + mode)
 
     #Ejercicio 3
-    # x_train_discr
-    selection(x_train_discr, x_test)
+    x_test_not_imputed = remove_columns(x_test, not_imputed)
+    x_sel_char, x_test_sel_char = selection(x_train_discr, x_test_not_imputed)
+    x_sample = pandas.DataFrame(x_sel_char)
+    x_sample = x_sample.sample(frac=0.3, random_state=1)
+    y_train = y_train.loc[x_sample.index]
+    x_test_sample = remove_columns(x_test, set(x_train.columns) - set(x_sample.columns))
+
+    print("Muestreo del 30%")
+    acc_res_sample = 0
+    acc_res_sample += pred(x_sample, y_train, x_test_sample, y_test)
+    print("Accuracy sample: " + str(acc_res_sample))
+
 
