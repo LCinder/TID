@@ -1,14 +1,12 @@
 import numpy as np
 import pandas
-import numpy
-from chefboost import Chefboost
 from sklearn.model_selection import train_test_split
 from sklearn.naive_bayes import GaussianNB
 from sklearn.preprocessing import KBinsDiscretizer
-from sklearn.svm import LinearSVC
-from sklearn.tree import DecisionTreeClassifier, export_graphviz
+from sklearn.tree import DecisionTreeClassifier
 from sklearn.metrics import accuracy_score
 from mlxtend.feature_selection import SequentialFeatureSelector as sequential_feature
+from imblearn.over_sampling import SMOTE
 from sklearn.linear_model import LinearRegression, LogisticRegression
 
 
@@ -151,7 +149,7 @@ def selection(x_sel, x_test_sel):
     #x_test_sel = remove_columns(x_test_sel, not_imputed)
     all = pred(x_sel, y_train, x_test_sel, y_test)
 
-    s = sequential_feature(GaussianNB(), k_features=5, forward=False)
+    s = sequential_feature(GaussianNB(), k_features=10, forward=False)
     s = s.fit(x_sel, np.ravel(y_train))
     features = list(s.k_feature_names_)
 
@@ -196,7 +194,13 @@ if __name__ == "__main__":
 
     print("Muestreo del 30%")
     acc_res_sample = 0
+    acc_res_oversample = 0
+
     acc_res_sample += pred(x_sample, y_train, x_test_sample, y_test)
     print("Accuracy sample: " + str(acc_res_sample))
+
+    x_oversample, y_train_oversample = SMOTE().fit_resample(x_sample, y_train)
+    acc_res_oversample += pred(x_oversample, y_train_oversample, x_test_sample, y_test)
+    print("Accuracy oversampling: " + str(acc_res_oversample))
 
 
