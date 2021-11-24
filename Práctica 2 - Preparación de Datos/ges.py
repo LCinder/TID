@@ -7,14 +7,13 @@ from sklearn.tree import DecisionTreeClassifier
 from sklearn.metrics import accuracy_score
 from mlxtend.feature_selection import SequentialFeatureSelector as sequential_feature
 from imblearn.over_sampling import SMOTE
-from sklearn.linear_model import LinearRegression, LogisticRegression
 
 
 def load_dataset():
     data = pandas.read_excel("data/accidentes_reduced.xls")
     features = data.columns[0:len(data.columns)-3]
     x = pandas.DataFrame(data[features])
-    y = pandas.DataFrame(data.PRPTYDMG_CRASH)
+    y = pandas.DataFrame(data.FATALITIES)
     return x, y
 
 
@@ -34,27 +33,24 @@ def pred(x_train_arg, y_train_arg, x_test_arg, y_test_arg):
 def discretize(x_train_arg, x_test_arg):
     x_train_arg = remove_columns(x_train_arg, not_imputed)
     x_test_arg = remove_columns(x_test_arg, not_imputed)
-    x_train_disc = x_train_arg
 
     # ["WKDY_I", "HOUR_I", "RELJCT_I", "MANCOL_I", "RELJCT_I", "ALIGN_I", "PROFIL_I", "SURCON_I", "TRFCON_I",
-    #"SPDLIM_H", "LGTCON_I", "WEATHR_I", "ALCHL_I"]
-    elements = ["HOUR_I", "SPDLIM_H", "WKDY_I"]
-    bins = [2, 5, 4]
+    # "SPDLIM_H", "LGTCON_I", "WEATHR_I", "ALCHL_I"]
+    elements = ["HOUR_I", "SPDLIM_H", "MANCOL_I"]
+    bins = [2, 4, 5, 10]
 
-    accuracy_mean_discr = 0
-    accuracy_mean = 0
-    n = 10
+    accuracy_mean = pred(x_train_arg, y_train, x_test_arg, y_test)
+    print("Accuracy: " + str(round(accuracy_mean, 3)))
 
-    for variable, bin_i in zip(elements, bins):
-        discr = KBinsDiscretizer(n_bins=bin_i, encode="ordinal", strategy="uniform")
+    for variable in elements:
+        for bin_i in bins:
+            x_train_disc = x_train_arg[:]
 
-        for i in range(n):
-            accuracy_mean += pred(x_train, y_train, x_test, y_test)
-            x_train_disc[variable] = discr.fit_transform(x_train_arg[variable].values.reshape(-1, 1))
-            accuracy_mean_discr += pred(x_train_disc, y_train, x_test_arg, y_test)
+            x_train_disc[variable] = pandas.cut(x_train_disc[variable], labels=range(bin_i), bins=bin_i)
+            accuracy_mean_discr = pred(x_train_disc, y_train, x_test_arg, y_test)
 
-    print("Accuracy: " + str(round(accuracy_mean / (n * len(elements)), 3)))
-    print("Accuracy Discretize: " + str(round(accuracy_mean_discr / (n * len(elements)), 3)))
+            print("Accuracy Discretize with variable/bin: " + variable + "/"
+            + str(bin_i) + " : " + str(round(accuracy_mean_discr, 3)))
 
     return x_train_disc
 
@@ -68,7 +64,7 @@ def loss_values():
     res_not_imputed = 0
     res_not_imputed_mean = 0
     res_not_imputed_mode = 0
-    n = 10
+    n = 50
 
     x_train_not_imputed_mode = remove_columns(x_train, imputed)
     x_train_not_imputed_mean = remove_columns(x_train, imputed)
@@ -149,7 +145,7 @@ def selection(x_sel, x_test_sel):
     #x_test_sel = remove_columns(x_test_sel, not_imputed)
     all = pred(x_sel, y_train, x_test_sel, y_test)
 
-    s = sequential_feature(GaussianNB(), k_features=10, forward=False)
+    s = sequential_feature(GaussianNB(), k_features=7, forward=False)
     s = s.fit(x_sel, np.ravel(y_train))
     features = list(s.k_feature_names_)
 
@@ -178,6 +174,7 @@ if __name__ == "__main__":
 
     #Ejercicio 1
     x_train_discr = discretize(x_train, x_test)
+    print("------------------------------------------------------------------")
 
     #Ejercicio 2
     best, mode  = loss_values()
