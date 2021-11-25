@@ -2,7 +2,6 @@ import numpy as np
 import pandas
 from sklearn.model_selection import train_test_split
 from sklearn.naive_bayes import GaussianNB
-from sklearn.preprocessing import KBinsDiscretizer
 from sklearn.tree import DecisionTreeClassifier
 from sklearn.metrics import accuracy_score
 from mlxtend.feature_selection import SequentialFeatureSelector as sequential_feature
@@ -13,11 +12,12 @@ def load_dataset():
     data = pandas.read_excel("data/accidentes_reduced.xls")
     features = data.columns[0:len(data.columns)-3]
     x = pandas.DataFrame(data[features])
-    y = pandas.DataFrame(data.FATALITIES)
+    y = pandas.DataFrame(data.INJURY_CRASH)
     return x, y
 
 
-def remove_columns(data, elements):
+def remove_columns(data_arg, elements):
+    data = data_arg[:]
     for element in elements:
         data = data.drop(element, axis="columns")
     return data
@@ -60,54 +60,46 @@ def loss_values():
     x_test_imputed = remove_columns(x_test, not_imputed)
     x_train_not_imputed = remove_columns(x_train, imputed)
     x_test_not_imputed = remove_columns(x_test, imputed)
-    res_imputed = 0
-    res_not_imputed = 0
-    res_not_imputed_mean = 0
-    res_not_imputed_mode = 0
-    n = 50
-
     x_train_not_imputed_mode = remove_columns(x_train, imputed)
     x_train_not_imputed_mean = remove_columns(x_train, imputed)
     unknown = [9, 99, 9, 19, 99, 9, 9, 9, 29, 49, 99, 99, 9, 9, 9]
 
-    for i in range(n):
-        res_imputed += pred(x_train_imputed, y_train, x_test_imputed, y_test)
-        res_not_imputed += pred(x_train_not_imputed, y_train, x_test_not_imputed, y_test)
+    res_imputed = pred(x_train_imputed, y_train, x_test_imputed, y_test)
+    res_not_imputed = pred(x_train_not_imputed, y_train, x_test_not_imputed, y_test)
 
-        for variable, value in zip(not_imputed, unknown):
-            x_train_not_imputed_mean[variable] = x_train_not_imputed_mean[variable].replace(value, None)
+    for variable, value in zip(not_imputed, unknown):
+        x_train_not_imputed_mean[variable] = x_train_not_imputed_mean[variable].replace(value, None)
 
-            mean = x_train_not_imputed_mean[variable].mean()
-            x_train_not_imputed_mean[variable].fillna(value=mean)
+        mean = x_train_not_imputed_mean[variable].mean()
+        x_train_not_imputed_mean[variable].fillna(value=mean)
 
-            mode = x_train_not_imputed_mode[variable].mode()[0]
-            x_train_not_imputed_mode[variable].replace(value, mode, inplace=True)
+        mode = x_train_not_imputed_mode[variable].mode()[0]
+        x_train_not_imputed_mode[variable].replace(value, mode, inplace=True)
 
-        res_not_imputed_mean += pred(x_train_not_imputed_mean, y_train, x_test_not_imputed, y_test)
-        res_not_imputed_mode += pred(x_train_not_imputed_mode, y_train, x_test_not_imputed, y_test)
+    res_not_imputed_mean = pred(x_train_not_imputed_mean, y_train, x_test_not_imputed, y_test)
+    res_not_imputed_mode = pred(x_train_not_imputed_mode, y_train, x_test_not_imputed, y_test)
 
-    x_train_imputed_instances = x_train_imputed
-    x_test_imputed_instances = x_test_imputed
+    x_train_imputed_instances = x_train_imputed[:]
+    x_test_imputed_instances = x_test_imputed[:]
 
     for i in x_train_imputed_instances.columns:
-        x_train_imputed_instances[(x_train_imputed_instances[i] != 9) & (x_train_imputed_instances[i] != 19)
+        x_train_imputed_instances = x_train_imputed_instances[(x_train_imputed_instances[i] != 9) & (x_train_imputed_instances[i] != 19)
         & (x_train_imputed_instances[i] != 29) & (x_train_imputed_instances[i] != 49) & (x_train_imputed_instances[i] != 99)]
-        
-        x_test_imputed_instances[(x_test_imputed_instances[i] != 9) & (x_test_imputed_instances[i] != 19)
+
+        x_test_imputed_instances = x_test_imputed_instances[(x_test_imputed_instances[i] != 9) & (x_test_imputed_instances[i] != 19)
         & (x_test_imputed_instances[i] != 29) & (x_test_imputed_instances[i] != 49) & (
         x_test_imputed_instances[i] != 99)]
 
     acc_imputed_removed_instances = pred(x_train_imputed, y_train, x_test_imputed, y_test)
 
-    x_train_imputed = remove_columns(x_train, not_imputed)
     x_train_imputed = remove_columns(x_train_imputed, imputed)
     x_test_imputed = remove_columns(x_test_imputed, imputed)
-    acc_imputed_removed_characteristics = pred(x_train_imputed, y_train, x_test_imputed, y_test)
 
-    acc_imputed = round(res_imputed/n, 3)
-    acc_not_imputed = round(res_not_imputed/n, 3)
-    acc_not_imputed_mean = round(res_not_imputed_mean/n, 3)
-    acc_not_imputed_mode = round(res_not_imputed_mode/n, 3)
+    acc_imputed = round(res_imputed, 3)
+    acc_not_imputed = round(res_not_imputed, 3)
+    acc_not_imputed_mean = round(res_not_imputed_mean, 3)
+    acc_not_imputed_mode = round(res_not_imputed_mode, 3)
+    acc_imputed_removed_characteristics = pred(x_train_imputed, y_train, x_test_imputed, y_test)
 
     print("Accuracy Imputed: " + str(acc_imputed))
     print("Accuracy Not Imputed: " + str(acc_not_imputed))
@@ -155,7 +147,7 @@ def selection(x_sel, x_test_sel):
     x_test_sel = remove_columns(x_test_sel, not_selected)
     removed_features = pred(x_sel, y_train, x_test_sel, y_test)
 
-    print("Accuracy All: " + str(all))
+    print("Accuracy All Characteristics: " + str(all))
     print("Features: " + str(features))
     print("Accuracy Removed Features: " + str(removed_features))
 
@@ -177,9 +169,10 @@ if __name__ == "__main__":
     print("------------------------------------------------------------------")
 
     #Ejercicio 2
-    best, mode  = loss_values()
+    best, mode = loss_values()
 
     print("El mejor es " + mode)
+    print("------------------------------------------------------------------")
 
     #Ejercicio 3
     x_test_not_imputed = remove_columns(x_test, not_imputed)
@@ -193,11 +186,11 @@ if __name__ == "__main__":
     acc_res_sample = 0
     acc_res_oversample = 0
 
-    acc_res_sample += pred(x_sample, y_train, x_test_sample, y_test)
+    acc_res_sample = pred(x_sample, y_train, x_test_sample, y_test)
     print("Accuracy sample: " + str(acc_res_sample))
 
     x_oversample, y_train_oversample = SMOTE().fit_resample(x_sample, y_train)
-    acc_res_oversample += pred(x_oversample, y_train_oversample, x_test_sample, y_test)
+    acc_res_oversample = pred(x_oversample, y_train_oversample, x_test_sample, y_test)
     print("Accuracy oversampling: " + str(acc_res_oversample))
 
 
