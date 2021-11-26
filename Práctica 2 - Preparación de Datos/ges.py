@@ -12,7 +12,8 @@ def load_dataset():
     data = pandas.read_excel("data/accidentes_reduced.xls")
     features = data.columns[0:len(data.columns)-3]
     x = pandas.DataFrame(data[features])
-    y = pandas.DataFrame(data.INJURY_CRASH)
+    y = pandas.DataFrame(data[["FATALITIES", "INJURY_CRASH"]].any(axis="columns"))
+    y.replace({False: 0, True: 1}, inplace=True)
     return x, y
 
 
@@ -36,7 +37,7 @@ def discretize(x_train_arg, x_test_arg):
 
     # ["WKDY_I", "HOUR_I", "RELJCT_I", "MANCOL_I", "RELJCT_I", "ALIGN_I", "PROFIL_I", "SURCON_I", "TRFCON_I",
     # "SPDLIM_H", "LGTCON_I", "WEATHR_I", "ALCHL_I"]
-    elements = ["HOUR_I", "SPDLIM_H", "MANCOL_I"]
+    elements = ["HOUR_I", "SPDLIM_H", "MONTH"]
     bins = [2, 4, 5, 10]
 
     accuracy_mean = pred(x_train_arg, y_train, x_test_arg, y_test)
@@ -49,10 +50,13 @@ def discretize(x_train_arg, x_test_arg):
             x_train_disc[variable] = pandas.cut(x_train_disc[variable], labels=range(bin_i), bins=bin_i)
             accuracy_mean_discr = pred(x_train_disc, y_train, x_test_arg, y_test)
 
+            if bin_i == 2 and variable == "HOUR_I":
+                x_train_disc_final = x_train_disc
+
             print("Accuracy Discretize with variable/bin: " + variable + "/"
             + str(bin_i) + " : " + str(round(accuracy_mean_discr, 3)))
 
-    return x_train_disc
+    return x_train_disc_final
 
 
 def loss_values():
@@ -137,7 +141,7 @@ def selection(x_sel, x_test_sel):
     #x_test_sel = remove_columns(x_test_sel, not_imputed)
     all = pred(x_sel, y_train, x_test_sel, y_test)
 
-    s = sequential_feature(GaussianNB(), k_features=7, forward=False)
+    s = sequential_feature(GaussianNB(), k_features=10, forward=False)
     s = s.fit(x_sel, np.ravel(y_train))
     features = list(s.k_feature_names_)
 
