@@ -8,7 +8,7 @@ from sklearn.tree import DecisionTreeClassifier
 from sklearn.svm import SVC, LinearSVC
 from sklearn.neighbors import KNeighborsClassifier, KNeighborsRegressor
 from sklearn.neural_network import MLPClassifier
-from sklearn.metrics import roc_auc_score, roc_curve, plot_roc_curve, plot_confusion_matrix
+from sklearn.metrics import roc_auc_score, roc_curve, plot_roc_curve, confusion_matrix, ConfusionMatrixDisplay
 from sklearn.preprocessing import LabelEncoder, OneHotEncoder
 from sklearn.metrics import accuracy_score
 from mlxtend.feature_selection import SequentialFeatureSelector as sequential_feature
@@ -36,7 +36,8 @@ def pred(x_train_arg, y_train_arg, x_test_arg, y_test_arg, roc=False):
         auc = roc_auc_score(y_test_arg, y_pred)
         plot.plot(fpr, tpr)
         plot.title("AUC: " + str(auc))
-        plot_confusion_matrix(predictor, x_test_arg, y_test_arg)
+        disp = ConfusionMatrixDisplay(confusion_matrix(y_test_arg, y_pred))
+        disp.plot()
         plot.show()
     return round(accuracy_score(y_test_arg, y_pred), 3)
 
