@@ -43,7 +43,7 @@ def pred(x_train_arg, y_train_arg, x_test_arg, y_test_arg, roc=False):
 
 
 def discretize(x_train_arg, x_test_arg):
-    elements = ["Age", "Alcohol_Results"]
+    elements = ["Age", "Alcohol_Results", "weekday"]
     bins = [2, 4, 5, 10]
 
     accuracy_mean = pred(x_train_arg, y_train, x_test_arg, y_test)
@@ -135,10 +135,12 @@ if __name__ == "__main__":
 
     x_train, x_test, y_train, y_test = train_test_split(x, y, train_size=0.6)
 
+    #x_train_discr = discretize(x_train, x_test)
     print("------------------------------------------------------------------")
     x_train, best = loss_values()
     print(best)
     print("------------------------------------------------------------------")
-    #x_train, y_train = SMOTE().fit_resample(x_train, y_train)
+    x_train, y_train = SMOTE(sampling_strategy=0.7).fit_resample(x_train, y_train)
+    x_test, y_test = SMOTE(sampling_strategy=0.7).fit_resample(x_test, y_test)
     accuracy = pred(x_train, y_train, x_test, y_test, True)
     print("Accuracy: " + str(accuracy))
