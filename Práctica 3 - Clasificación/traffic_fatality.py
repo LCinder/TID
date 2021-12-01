@@ -28,7 +28,7 @@ def remove_columns(data_arg, elements):
     return data
 
 
-def pred(x_train_arg, y_train_arg, x_test_arg, y_test_arg, tipo, roc=False):
+def pred(x_arg, y_arg, tipo, roc=False):
     if tipo == "NB":
         predictor = GaussianNB()
     elif tipo == "KNC":
@@ -42,22 +42,24 @@ def pred(x_train_arg, y_train_arg, x_test_arg, y_test_arg, tipo, roc=False):
     elif tipo == "ABC":
         predictor = AdaBoostClassifier()
 ############################################################################
+    x_train, x_test, y_train, y_test = train_test_split(x_arg, y_arg, train_size=0.6)
+
     if tipo == "KNC" or tipo == "ABC":
-        predictor.fit(x_train_arg.values, y_train_arg)
-        y_pred = predictor.predict(x_test_arg.values)
+        predictor.fit(x_train.values, numpy.ravel(y_train))
+        y_pred = predictor.predict(x_test.values)
     else:
-        predictor.fit(x_train_arg, y_train_arg)
-        y_pred = predictor.predict(x_test_arg)
+        predictor.fit(x_train.values, y_train)
+        y_pred = predictor.predict(x_test)
     if roc:
-        fpr, tpr, threshold = roc_curve(y_test_arg, y_pred)
-        auc = roc_auc_score(y_test_arg, y_pred)
+        fpr, tpr, threshold = roc_curve(y_test, y_pred)
+        auc = roc_auc_score(y_test, y_pred)
         plot.plot(fpr, tpr)
         plot.title("AUC: " + str(auc))
-        disp = ConfusionMatrixDisplay(confusion_matrix(y_test_arg, y_pred))
+        disp = ConfusionMatrixDisplay(confusion_matrix(y_test, y_pred))
         disp.plot()
         plot.show()
-        print("Cross Val: " + str(round(cross_val_score(predictor, x_test_arg, y_test_arg).mean(), 3)))
-    return round(accuracy_score(y_test_arg, y_pred), 3)
+        print("Cross Val: " + str(round(cross_val_score(predictor, x_arg, y_arg).mean(), 3)))
+    return round(cross_val_score(predictor, x_arg, numpy.ravel(y_arg)).mean(), 3)
 
 
 def discretize(x_train_arg, x_test_arg):
@@ -106,6 +108,9 @@ def loss_values(tipo):
     x_mode = x.copy()
     y_mean = y.copy()
     y_mode = y.copy()
+    x_characteristics = x.copy()
+    y_characteristics = y.copy()
+
     variables = ["Alcohol_Results", "Age"]
     #res_init = pred(x_train, y_train, x_test_test, y_test, tipo)
 
@@ -119,24 +124,11 @@ def loss_values(tipo):
         mode = x_mode[variable].mode()[0]
         x_mode[variable].replace(numpy.nan, mode, inplace=True)
 
-    x_train_mean, x_test_mean, y_train_mean, y_test_mean = train_test_split(x_mean, y_mean, train_size=0.6, random_state=2)
-    y_train_mean = np.ravel(y_train_mean)
-    y_test_mean = np.ravel(y_test_mean)
-    x_train_mode, x_test_mode, y_train_mode, y_test_mode = train_test_split(x_mode, y_mode, train_size=0.6, random_state=2)
-    y_train_mode = np.ravel(y_train_mode)
-    y_test_mode = np.ravel(y_test_mode)
-    res_not_imputed_mean = pred(x_train_mean, y_train_mean, x_test_mean, y_test_mean, tipo)
-    res_not_imputed_mode = pred(x_train_mode, y_train_mode, x_test_mode, y_test_mode, tipo)
-
-    x_characteristics = x.copy()
-    y_characteristics = y.copy()
     x_characteristics = remove_columns(x_characteristics, ["Age", "Alcohol_Results"])
 
-    x_train_characteristics, x_test_characteristics, y_train_characteristics, y_test_characteristics \
-    = train_test_split(x_characteristics, y_characteristics, train_size=0.6, random_state=2)
-    y_train_characteristics = np.ravel(y_train_characteristics)
-    y_test_characteristics = np.ravel(y_test_characteristics)
-    res_not_imputed_characteristics = pred(x_train_characteristics, y_train_characteristics, x_test_characteristics, y_test_characteristics, tipo)
+    res_not_imputed_mean = pred(x_mean, y_mean, tipo)
+    res_not_imputed_mode = pred(x_mode, y_mode, tipo)
+    res_not_imputed_characteristics = pred(x_characteristics, y_characteristics, tipo)
 
     #acc = round(res_init, 3)
     acc_not_imputed_mean = round(res_not_imputed_mean, 3)
@@ -154,11 +146,11 @@ def loss_values(tipo):
     sort = sorted(best.items(), reverse=True)[0]
 
     if sort[1] == "Mean":
-        return x_train_mean, y_train_mean, x_test_mean, y_test_mean, "Mean"
+        return x_mean, y_mean, "Mean"
     elif sort[1] == "Mode":
-        return x_train_mode, y_train_mode, x_test_mode, y_test_mode, "Mode"
+        return x_mode, y_mode, "Mode"
     elif sort[1] == "Removed Characteristics":
-        return x_train_characteristics, y_train_characteristics, x_test_characteristics, y_test_characteristics, "Removed Characteristics"
+        return x_characteristics, y_characteristics, "Removed Characteristics"
 
 
 if __name__ == "__main__":
@@ -190,11 +182,11 @@ if __name__ == "__main__":
         tipo = "ABC"
 
     print("------------------------------------------------------------------")
-    x_train, y_train, x_test, y_test, best = loss_values(tipo)
+    x_res, y_res, best = loss_values(tipo)
     print(best)
     print("------------------------------------------------------------------")
-    x_train, y_train = SMOTE().fit_resample(x_train, y_train)
-    accuracy = pred(x_train, y_train, x_test, y_test, tipo, True)
+    x_train, y_train = SMOTE().fit_resample(x_res, y_res)
+    accuracy = pred(x_res, y_res, tipo, True)
     print("Accuracy SMOTE: " + str(accuracy))
 
 
