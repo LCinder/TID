@@ -44,12 +44,14 @@ def pred(x_arg, y_arg, tipo, roc=False):
 ############################################################################
     x_train, x_test, y_train, y_test = train_test_split(x_arg, y_arg, train_size=0.6)
 
-    if tipo == "KNC" or tipo == "ABC":
-        predictor.fit(x_train.values, numpy.ravel(y_train))
-        y_pred = predictor.predict(x_test.values)
-    else:
-        predictor.fit(x_train.values, y_train)
-        y_pred = predictor.predict(x_test)
+    y_arg = numpy.ravel(y_arg)
+    y_test = numpy.ravel(y_test)
+    y_train = numpy.ravel(y_train)
+
+    predictor.fit(x_train, y_train)
+    y_pred = predictor.predict(x_test)
+    y_pred = numpy.ravel(y_pred)
+
     if roc:
         fpr, tpr, threshold = roc_curve(y_test, y_pred)
         auc = roc_auc_score(y_test, y_pred)
