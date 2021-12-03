@@ -101,6 +101,10 @@ def preprocess(data):
     y = pandas.DataFrame(data.Fatality)
     y.replace("no_fatal", 0, inplace=True)
     y.replace("fatal", 1, inplace=True)
+
+    # Normalizar
+    for column in x.columns:
+        x[column] = x[column] / x[column].max()
     
     return x, y
 
