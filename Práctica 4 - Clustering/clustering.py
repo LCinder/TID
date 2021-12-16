@@ -38,9 +38,12 @@ def loss_values():
     variables = ["MINIMUM_PAYMENTS", "CREDIT_LIMIT"]
 
     for variable in variables:
-        mean = x_mean[variable].mean()
-        x_mean[variable].replace(numpy.nan, mean, inplace=True)
-
+        if variable == "CREDIT_LIMIT":
+            mean = x_mean[variable].mean()
+            x_mean[variable].replace(numpy.nan, mean, inplace=True)
+        else:
+            mode = x_mean[variable].mode()[0]
+            x_mean[variable].replace(numpy.nan, mode, inplace=True)
     return x_mean
 
 
@@ -127,7 +130,7 @@ if __name__ == "__main__":
     ##########################################################################
     # Make Cluster
     ##########################################################################
-    cluster = pred(x_pre, 3, type1)
+    cluster = pred(x_pre, 2, type1)
     y_pred = numpy.ravel(cluster.labels_)
     ##########################################################################
     # Plot clusters
