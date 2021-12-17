@@ -28,7 +28,7 @@ def remove_columns(data_arg, elements):
     return data
 
 
-def pred(x_arg, y_arg, tipo, roc=False):
+def pred(x_arg, y_arg, tipo, roc=False, value=""):
     if tipo == "NB":
         predictor = GaussianNB()
     elif tipo == "KNC":
@@ -55,10 +55,17 @@ def pred(x_arg, y_arg, tipo, roc=False):
     if roc:
         fpr, tpr, threshold = roc_curve(y_test, y_pred)
         auc = roc_auc_score(y_test, y_pred)
-        plot.plot(fpr, tpr)
-        plot.title("AUC: " + str(auc))
-        disp = ConfusionMatrixDisplay(confusion_matrix(y_test, y_pred))
-        disp.plot()
+        plot.xlabel("False Positive Rate")
+        plot.ylabel("True Positive Rate")
+        plot.plot(fpr, tpr, color="red", label=tipo, linestyle="dotted")
+        plot.plot(numpy.arange(0, 1, 0.1), numpy.arange(0, 1, 0.1), color="blue", label="Worst Score", linestyle="--")
+        plot.title("Classifier: " + tipo + " " + value + ", AUC: " + str(round(auc, 3)))
+        plot.legend()
+        plot.plot()
+        plot.savefig("res_" + str(value) + ".png")
+        disp = ConfusionMatrixDisplay.from_estimator(predictor, x_test, y_test, cmap=plot.cm.Blues, normalize="true",
+        display_labels=["no_fatal", "fatal"])
+        plot.savefig("confussion_matrix_" + str(value) + ".png")
         plot.show()
         print("Cross Val: " + str(round(cross_val_score(predictor, x_arg, y_arg).mean(), 3)))
     return round(cross_val_score(predictor, x_arg, numpy.ravel(y_arg)).mean(), 3)
@@ -84,6 +91,9 @@ def discretize(x_train_arg, x_test_arg):
     return x_train_disc
 
 def preprocess(data):
+    data.replace("no_fatal", 0, inplace=True)
+    data.replace("fatal", 1, inplace=True)
+
     encoder = LabelEncoder()
     for column in data.columns:
         if isinstance(data[column][0], str):
@@ -99,8 +109,6 @@ def preprocess(data):
     features = data.columns[0:len(data.columns) - 1]
     x = pandas.DataFrame(data[features])
     y = pandas.DataFrame(data.Fatality)
-    y.replace("no_fatal", 0, inplace=True)
-    y.replace("fatal", 1, inplace=True)
 
     # Normalizar
     for column in x.columns:
@@ -190,9 +198,10 @@ if __name__ == "__main__":
     print("------------------------------------------------------------------")
     x_res, y_res, best = loss_values(tipo)
     print(best)
+    accuracy = pred(x_res, y_res, tipo, True, value="Normal")
     print("------------------------------------------------------------------")
-    x_train, y_train = SMOTE().fit_resample(x_res, y_res)
-    accuracy = pred(x_res, y_res, tipo, True)
+    x_oversample, y_oversample = SMOTE().fit_resample(x_res, y_res)
+    accuracy = pred(x_oversample, y_oversample, tipo, True, "SMOTE")
     print("Accuracy SMOTE: " + str(accuracy))
 
 
